@@ -9,7 +9,7 @@ class MainMenu : public cocos2d::Scene
 private:
     cocos2d::Vec2 deviceResolution;
     cocos2d::MenuItemImage* volumeItem;
-    cocos2d::MenuItemImage* playItem;
+    cocos2d::MenuItemImage* resetItem;
 
     bool isMuted;
     static bool isPlaying;
@@ -18,7 +18,7 @@ private:
 
     //selector callbacks
     void menuCloseCallback(cocos2d::Ref* pSender);
-    void menuPlayCallback(cocos2d::Ref* pSender);
+    void menuShuffleCallback(cocos2d::Ref* pSender);
     void menuVolumeCallback(cocos2d::Ref* pSender);
 
     void playBGM();

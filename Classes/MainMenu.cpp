@@ -61,10 +61,10 @@ bool MainMenu::init()
         "ui/exit_pressed.png",
         CC_CALLBACK_1(MainMenu::menuCloseCallback, this));
 
-    playItem = MenuItemImage::create(
-        "ui/PLAY.png",
-        "ui/PLAY_pressed.png",
-        CC_CALLBACK_1(MainMenu::menuPlayCallback, this));
+    resetItem = MenuItemImage::create(
+        "ui/reset.png",
+        "ui/reset_pressed.png",
+        CC_CALLBACK_1(MainMenu::menuShuffleCallback, this));
 
 
     volumeItem = MenuItemImage::create(
@@ -73,7 +73,7 @@ bool MainMenu::init()
         CC_CALLBACK_1(MainMenu::menuVolumeCallback, this));
 
 
-    if (closeItem == nullptr || playItem == nullptr || volumeItem == nullptr)
+    if (closeItem == nullptr || resetItem == nullptr || volumeItem == nullptr)
     {
         problemLoading("UI sprites");
     }
@@ -84,9 +84,9 @@ bool MainMenu::init()
         menu->setPosition(Vec2(visibleSize.width / 2 + 200, visibleSize.height / 22));
         this->addChild(menu, 38);
 
-        auto play = Menu::create(playItem, NULL);
-        play->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 22));
-        this->addChild(play, 39, "play");
+        auto reset = Menu::create(resetItem, NULL);
+        reset->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 22));
+        this->addChild(reset, 39, "reset");
 
         auto volume = Menu::create(volumeItem, NULL);
         volume->setPosition(Vec2(visibleSize.width / 2 - 200, visibleSize.height / 22));
@@ -149,17 +149,11 @@ void MainMenu::menuCloseCallback(Ref* pSender)
     Director::getInstance()->end();
 }
 
-void MainMenu::menuPlayCallback(Ref* pSender)
+void MainMenu::menuShuffleCallback(Ref* pSender)
 {
     clickID = audioInstance::play2d("sfx/click.mp3", false, 1.0f);
-    if (!isPlaying)
-    {
-        playItem->setNormalSpriteFrame(SpriteFrame::create("ui/LOCK.png", Rect(0, 0, 63, 66)));
-    }
-    else
-    {
-        playItem->setNormalSpriteFrame(SpriteFrame::create("ui/PLAY.png", Rect(0, 0, 63, 66)));
-    }
+
+    Board::getInstance()->resShuffleTillSolvable(this->getChildByTag(50));
 
 }
 void MainMenu::menuVolumeCallback(Ref* pSender)

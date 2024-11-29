@@ -39,15 +39,7 @@ void Board::initBoard(int _numRow, int _numColumn, std::string _background, coco
 
 	blocks.back()->setVisible(false);
 
-	reSuffleBoard();
-	//getRandomNumInRange(1, 9);
-
-	while (!checkIfSolvable())
-	{
-		CCLOG("Re-Shuffling");
-		resetBoard(_parent);
-		reSuffleBoard();
-	}
+	resShuffleTillSolvable(_parent);
 
 	auto _mouseListener = cocos2d::EventListenerMouse::create();
 	_mouseListener->onMouseUp = CC_CALLBACK_1(Board::onMouseEnded, this);
@@ -136,7 +128,6 @@ void Board::moveBlock(cocos2d::Sprite* blockItem, int lastblockPos, int clickedI
 void Board::resetBoard(cocos2d::Node* _parent)
 {
 	blocksMap.clear();
-	cocos2d::Vec2 pos = cocos2d::Vec2(188, 575);
 	for (int i = 1; i <= rowSize * columnSize; i++)
 	{
 		blocksMap[i] = i;
@@ -205,6 +196,22 @@ void Board::showNumMoves()
 	numMoves++;
 	auto moves = std::to_string(numMoves);
 	movesLabel->setString("Moves: " + moves);
+}
+
+void Board::resShuffleTillSolvable(cocos2d::Node* _parent)
+{
+	numMoves = 0;
+	movesLabel->setString("Moves: 0");
+
+	resetBoard(_parent);
+	reSuffleBoard();
+
+	while (!checkIfSolvable())
+	{
+		CCLOG("Re-Shuffling");
+		resetBoard(_parent);
+		reSuffleBoard();
+	}
 }
 
 void Board::onMouseEnded(cocos2d::Event* event)

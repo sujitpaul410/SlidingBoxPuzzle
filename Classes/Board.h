@@ -26,13 +26,14 @@ private:
 
 	void moveBlock(cocos2d::Sprite* blockItem, int lastblockPos, int clickedItemPos);
 	void resetBoard(cocos2d::Node* _parent);
+	void reSuffleBoard();
 
 public:
 	void initBoard(int _numRow, int _numColumn, std::string background, cocos2d::Node* parent, cocos2d::Label* movesLabel);
 	bool checkIfCompleted();
 	bool checkIfSolvable();
-	void reSuffleBoard();
 	void showNumMoves();
+	void resShuffleTillSolvable(cocos2d::Node* parent);
 
 	static Board* getInstance();
 };
