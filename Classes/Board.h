@@ -30,7 +30,7 @@ private:
 
 public:
 	void initBoard(int _numRow, int _numColumn, std::string background, cocos2d::Node* parent, cocos2d::Label* movesLabel);
-	bool checkIfCompleted();
+	bool checkIfCompleted(cocos2d::Node* parent);
 	bool checkIfSolvable();
 	void showNumMoves();
 	void resShuffleTillSolvable(cocos2d::Node* parent);

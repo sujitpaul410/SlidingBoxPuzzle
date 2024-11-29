@@ -53,9 +53,21 @@ void Board::initBoard(int _numRow, int _numColumn, std::string _background, coco
 	sp->setPosition(cocos2d::Vec2(0, 0));*/
 }
 
-bool Board::checkIfCompleted()
+bool Board::checkIfCompleted(cocos2d::Node* _parent)
 {
-	return false;
+	for (int i = 1; i <= rowSize * columnSize; i++)
+	{
+		if (_parent->getChildByName(std::to_string(i))->getPosition() != blocksPos[i - 1])
+		{
+			CCLOG("Not yet Completed");
+			return false;
+		}
+	}
+
+	CCLOG("Completed!");
+	_parent->getChildByName(std::to_string(rowSize * columnSize))->setVisible(true);
+	isSolved = true;
+	return true;
 }
 
 bool Board::checkIfSolvable()
@@ -121,8 +133,6 @@ void Board::moveBlock(cocos2d::Sprite* blockItem, int lastblockPos, int clickedI
 	int tmpLoc = blocksMap[lastblockPos];
 	blocksMap[lastblockPos] = blocksMap[clickedItemPos];
 	blocksMap[clickedItemPos] = tmpLoc;
-
-	showNumMoves();
 }
 
 void Board::resetBoard(cocos2d::Node* _parent)
@@ -133,6 +143,7 @@ void Board::resetBoard(cocos2d::Node* _parent)
 		blocksMap[i] = i;
 		_parent->getChildByName(std::to_string(i))->setPosition(blocksPos[i-1]);
 	}
+	_parent->getChildByName(std::to_string(rowSize* columnSize))->setVisible(false);
 }
 
 void Board::reSuffleBoard()
@@ -201,6 +212,7 @@ void Board::showNumMoves()
 void Board::resShuffleTillSolvable(cocos2d::Node* _parent)
 {
 	numMoves = 0;
+	isSolved = false;
 	movesLabel->setString("Moves: 0");
 
 	resetBoard(_parent);
@@ -217,6 +229,9 @@ void Board::resShuffleTillSolvable(cocos2d::Node* _parent)
 void Board::onMouseEnded(cocos2d::Event* event)
 {
 	//CCLOG("Mouse click ended");
+	if (isSolved)
+		return;
+
 	cocos2d::EventMouse* e = (cocos2d::EventMouse*)event;
 	auto posConv = blocks[0]->getParent()->convertToNodeSpace(e->getLocationInView());
 
@@ -288,6 +303,10 @@ void Board::onMouseEnded(cocos2d::Event* event)
 				CCLOG("Moving Up");
 				moveBlock(blockItem, lastblockPos, clickedItemPos);
 				showNumMoves();
+				if (checkIfCompleted(blockItem->getParent()))
+				{
+					blockItem->setColor(cocos2d::Color3B(255, 255, 255));
+				}
 				return;
 			}
 			else if (clickedPos == posDown)
@@ -295,6 +314,10 @@ void Board::onMouseEnded(cocos2d::Event* event)
 				CCLOG("Moving Down");
 				moveBlock(blockItem, lastblockPos, clickedItemPos);
 				showNumMoves();
+				if (checkIfCompleted(blockItem->getParent()))
+				{
+					blockItem->setColor(cocos2d::Color3B(255, 255, 255));
+				}
 				return;
 			}
 			if (clickedPos == posRight)
@@ -302,6 +325,10 @@ void Board::onMouseEnded(cocos2d::Event* event)
 				CCLOG("Moving Right");
 				moveBlock(blockItem, lastblockPos, clickedItemPos);
 				showNumMoves();
+				if (checkIfCompleted(blockItem->getParent()))
+				{
+					blockItem->setColor(cocos2d::Color3B(255, 255, 255));
+				}
 				return;
 			}
 			if (clickedPos == posLeft)
@@ -309,6 +336,10 @@ void Board::onMouseEnded(cocos2d::Event* event)
 				CCLOG("Moving Left");
 				moveBlock(blockItem, lastblockPos, clickedItemPos);
 				showNumMoves();
+				if (checkIfCompleted(blockItem->getParent()))
+				{
+					blockItem->setColor(cocos2d::Color3B(255, 255, 255));
+				}
 				return;
 			}
 		}
@@ -318,6 +349,9 @@ void Board::onMouseEnded(cocos2d::Event* event)
 void Board::onMouseMove(cocos2d::Event* event)
 {
 	//CCLOG("Mouse moving");
+	if (isSolved)
+		return;
+
 	cocos2d::EventMouse* e = (cocos2d::EventMouse*)event;
 
 	auto posConv = blocks[0]->getParent()->convertToNodeSpace(e->getLocationInView());
@@ -353,4 +387,5 @@ Board::Board(int _numRow, int _numColumn)
 	rowSize = _numRow;
 	columnSize = _numColumn;
 	numMoves = 0;
+	isSolved = false;
 }
