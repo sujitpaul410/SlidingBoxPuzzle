@@ -59,12 +59,12 @@ bool Board::checkIfCompleted(cocos2d::Node* _parent)
 	{
 		if (_parent->getChildByName(std::to_string(i))->getPosition() != blocksPos[i - 1])
 		{
-			CCLOG("Not yet Completed");
+			//CCLOG("Not yet Completed");
 			return false;
 		}
 	}
 
-	CCLOG("Completed!");
+	//CCLOG("Completed!");
 	_parent->getChildByName(std::to_string(rowSize * columnSize))->setVisible(true);
 	isSolved = true;
 	return true;
@@ -81,7 +81,7 @@ bool Board::checkIfSolvable()
 		{
 			if (blocksMap[indx]<(rowSize*columnSize) && blocksMap[indx] > blocksMap[laterIndx])
 			{
-				CCLOG("blocksMap[indx]: %d  blocksMap[laterIndx]: %d", blocksMap[indx], blocksMap[laterIndx]);
+				//CCLOG("blocksMap[indx]: %d  blocksMap[laterIndx]: %d", blocksMap[indx], blocksMap[laterIndx]);
 				countInversion++;
 			}
 		}
@@ -95,31 +95,31 @@ bool Board::checkIfSolvable()
 		}
 	}
 
-	CCLOG("Count inversion: %d", countInversion);
+	//CCLOG("Count inversion: %d", countInversion);
 	if (rowSize % 2 != 0 && countInversion % 2 == 0)
 	{
-		CCLOG("Solvable");
+		//CCLOG("Solvable");
 		return true;
 	}
 	else if (rowSize % 2 == 0)
 	{
 		if (lastblockPos % 2 == 0 && countInversion % 2 != 0)
 		{
-			CCLOG("Solvable");
+			//CCLOG("Solvable");
 			return true;
 		}
 		else if (lastblockPos % 2 != 0 && countInversion % 2 == 0)
 		{
-			CCLOG("Solvable");
+			//CCLOG("Solvable");
 			return true;
 		}
 		else
 		{
-			CCLOG("Not Solvable");
+			//CCLOG("Not Solvable");
 			return false;
 		}
 	}
-	CCLOG("Not Solvable");
+	//CCLOG("Not Solvable");
 	return false;
 }
 
@@ -129,7 +129,7 @@ void Board::moveBlock(cocos2d::Sprite* blockItem, int lastblockPos, int clickedI
 	blocks.back()->setPosition(blockItem->getPosition());
 	blockItem->setPosition(tmpPos);
 
-	CCLOG("MAP swap-> %d %d", blocksMap[lastblockPos], blocksMap[clickedItemPos]);
+	//CCLOG("MAP swap-> %d %d", blocksMap[lastblockPos], blocksMap[clickedItemPos]);
 	int tmpLoc = blocksMap[lastblockPos];
 	blocksMap[lastblockPos] = blocksMap[clickedItemPos];
 	blocksMap[clickedItemPos] = tmpLoc;
@@ -220,7 +220,7 @@ void Board::resShuffleTillSolvable(cocos2d::Node* _parent)
 
 	while (!checkIfSolvable())
 	{
-		CCLOG("Re-Shuffling");
+		//CCLOG("Re-Shuffling");
 		resetBoard(_parent);
 		reSuffleBoard();
 	}
@@ -243,10 +243,10 @@ void Board::onMouseEnded(cocos2d::Event* event)
 			lastblockPos = item.first;
 		}
 	}
-	CCLOG("Empty block is at pos: %d", lastblockPos);
+	//CCLOG("Empty block is at pos: %d", lastblockPos);
 	int _x = (lastblockPos-1) / rowSize;
 	int _y = (lastblockPos-1) % rowSize;
-	CCLOG("2d index pos-> x: %d  y: %d", _x, _y);
+	//CCLOG("2d index pos-> x: %d  y: %d", _x, _y);
 
 	cocos2d::Vec2 posUp{ float(_x - 1), float(_y) };
 	cocos2d::Vec2 posLeft{ float(_x), float(_y - 1) };
@@ -258,7 +258,7 @@ void Board::onMouseEnded(cocos2d::Event* event)
 	CCLOG("posRightX: %d  posRightY: %d", (int)posRight.x, (int)posRight.y);
 	CCLOG("posDownX: %d  posDownY: %d", (int)posDown.x, (int)posDown.y);*/
 
-	if (posUp.x >= 0 && posUp.x < rowSize && posUp.y >= 0 && posUp.y < rowSize)
+	/*if (posUp.x >= 0 && posUp.x < rowSize && posUp.y >= 0 && posUp.y < rowSize)
 	{
 		CCLOG("Up move is valid");
 	}
@@ -273,13 +273,13 @@ void Board::onMouseEnded(cocos2d::Event* event)
 	if (posDown.x >= 0 && posDown.x < rowSize && posDown.y >= 0 && posDown.y < rowSize)
 	{
 		CCLOG("Down move is valid");
-	}
+	}*/
 
 	for (auto blockItem : blocks)
 	{
 		if (blockItem->getBoundingBox().containsPoint(posConv))
 		{
-			CCLOG(blockItem->getName().data());
+			//CCLOG(blockItem->getName().data());
 			//blockItem->setVisible(false);
 
 			int clickedItemPos = -1;
@@ -290,17 +290,17 @@ void Board::onMouseEnded(cocos2d::Event* event)
 					clickedItemPos = item.first;
 				}
 			}
-			CCLOG("Clicked item pos: %d", clickedItemPos);
+			//CCLOG("Clicked item pos: %d", clickedItemPos);
 
 			int _clickedX = (clickedItemPos - 1) / rowSize;
 			int _clickedY = (clickedItemPos - 1) % rowSize;
-			CCLOG("ClickedBlockPosX: %d  ClickedBlockPosY: %d", _clickedX, _clickedY);
+			//CCLOG("ClickedBlockPosX: %d  ClickedBlockPosY: %d", _clickedX, _clickedY);
 
 			cocos2d::Vec2 clickedPos{ float(_clickedX), float(_clickedY) };
 
 			if (clickedPos == posUp)
 			{
-				CCLOG("Moving Up");
+				//CCLOG("Moving Up");
 				moveBlock(blockItem, lastblockPos, clickedItemPos);
 				showNumMoves();
 				if (checkIfCompleted(blockItem->getParent()))
@@ -311,7 +311,7 @@ void Board::onMouseEnded(cocos2d::Event* event)
 			}
 			else if (clickedPos == posDown)
 			{
-				CCLOG("Moving Down");
+				//CCLOG("Moving Down");
 				moveBlock(blockItem, lastblockPos, clickedItemPos);
 				showNumMoves();
 				if (checkIfCompleted(blockItem->getParent()))
@@ -322,7 +322,7 @@ void Board::onMouseEnded(cocos2d::Event* event)
 			}
 			if (clickedPos == posRight)
 			{
-				CCLOG("Moving Right");
+				//CCLOG("Moving Right");
 				moveBlock(blockItem, lastblockPos, clickedItemPos);
 				showNumMoves();
 				if (checkIfCompleted(blockItem->getParent()))
@@ -333,7 +333,7 @@ void Board::onMouseEnded(cocos2d::Event* event)
 			}
 			if (clickedPos == posLeft)
 			{
-				CCLOG("Moving Left");
+				//CCLOG("Moving Left");
 				moveBlock(blockItem, lastblockPos, clickedItemPos);
 				showNumMoves();
 				if (checkIfCompleted(blockItem->getParent()))
