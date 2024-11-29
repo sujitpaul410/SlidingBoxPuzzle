@@ -19,11 +19,12 @@ void Board::initBoard(int _numRow, int _numColumn, std::string _background, coco
 			cocos2d::Sprite* block = cocos2d::Sprite::create(_background, cocos2d::Rect(rectPosX, rectPosY, 364, 225));
 			cocos2d::Label* blockLabel = cocos2d::Label::createWithTTF(std::to_string(blockNum), "fonts/Marker Felt.ttf", 35);
 			blockLabel->enableOutline(cocos2d::Color4B(0, 0, 0, 255), 2);
-			block->addChild(blockLabel);
+			block->addChild(blockLabel, 1, "text");
 			blockLabel->setPosition(cocos2d::Vec2(20, 200));
-			_parent->addChild(block);
+			_parent->addChild(block, blockNum, std::to_string(blockNum));
 			blocks.push_back(block);
 			block->setPosition(pos);
+			blocksPos.push_back(pos);
 			blocksMap[blockNum] = blockNum;
 			pos.x += 367;
 			rectPosX += 364;
@@ -34,14 +35,16 @@ void Board::initBoard(int _numRow, int _numColumn, std::string _background, coco
 		rectPosX = 0;
 		rectPosY += 225;
 	}
+
 	blocks.back()->setVisible(false);
 
 	reSuffleBoard();
 	//getRandomNumInRange(1, 9);
+
 	while (!checkIfSolvable())
 	{
 		CCLOG("Re-Shuffling");
-		blocksMap.clear();
+		resetBoard(_parent);
 		reSuffleBoard();
 	}
 
@@ -71,8 +74,9 @@ bool Board::checkIfSolvable()
 	{
 		for (int laterIndx = indx + 1; laterIndx < blocksMap.size(); laterIndx++)
 		{
-			if (blocksMap[indx] > blocksMap[laterIndx])
+			if (blocksMap[indx]<(rowSize*columnSize) && blocksMap[indx] > blocksMap[laterIndx])
 			{
+				CCLOG("blocksMap[indx]: %d  blocksMap[laterIndx]: %d", blocksMap[indx], blocksMap[laterIndx]);
 				countInversion++;
 			}
 		}
@@ -86,6 +90,7 @@ bool Board::checkIfSolvable()
 		}
 	}
 
+	CCLOG("Count inversion: %d", countInversion);
 	if (rowSize % 2 != 0 && countInversion % 2 == 0)
 	{
 		CCLOG("Solvable");
@@ -126,6 +131,17 @@ int Board::getRandomNumInRange(int min, int max)
 	}
 
 	return distrib(gen);
+}
+
+void Board::resetBoard(cocos2d::Node* _parent)
+{
+	blocksMap.clear();
+	cocos2d::Vec2 pos = cocos2d::Vec2(188, 575);
+	for (int i = 1; i <= rowSize * columnSize; i++)
+	{
+		blocksMap[i] = i;
+		_parent->getChildByName(std::to_string(i))->setPosition(blocksPos[i-1]);
+	}
 }
 
 void Board::reSuffleBoard()
@@ -170,8 +186,9 @@ void Board::reSuffleBoard()
 	std::unordered_map<int, int> visitedBlocks;
 	for (auto i : blocksMap)
 	{
-		if (visitedBlocks.find(i.first) == visitedBlocks.end() && visitedBlocks.find(i.second) == visitedBlocks.end())
+		if (i.first!=0 && i.second!=0 && visitedBlocks.find(i.first) == visitedBlocks.end() && visitedBlocks.find(i.second) == visitedBlocks.end())
 		{
+			//CCLOG("Swap: %s->%s", (blocks[i.first - 1]->getName().data()), (blocks[i.second - 1]->getName().data()));
 			auto tmpPos = blocks[i.first - 1]->getPosition();
 			blocks[i.first - 1]->setPosition(blocks[i.second - 1]->getPosition());
 			blocks[i.second - 1]->setPosition(tmpPos);
@@ -201,11 +218,125 @@ void Board::onMouseEnded(cocos2d::Event* event)
 	cocos2d::EventMouse* e = (cocos2d::EventMouse*)event;
 	auto posConv = blocks[0]->getParent()->convertToNodeSpace(e->getLocationInView());
 
+	int lastblockPos = -1;
+	for (auto item : blocksMap)
+	{
+		if (item.second == stoi(blocks.back()->getName()))
+		{
+			lastblockPos = item.first;
+		}
+	}
+	CCLOG("Empty block is at pos: %d", lastblockPos);
+	int _x = (lastblockPos-1) / rowSize;
+	int _y = (lastblockPos-1) % rowSize;
+	CCLOG("2d index pos-> x: %d  y: %d", _x, _y);
+
+	cocos2d::Vec2 posUp{ float(_x - 1), float(_y) };
+	cocos2d::Vec2 posLeft{ float(_x), float(_y - 1) };
+	cocos2d::Vec2 posRight{ float(_x), float(_y + 1) };
+	cocos2d::Vec2 posDown{ float(_x + 1), float(_y) };
+
+	/*CCLOG("posUpX: %d  posUpY: %d", (int)posUp.x, (int)posUp.y);
+	CCLOG("posLeftX: %d  posLeftY: %d", (int)posLeft.x, (int)posLeft.y);
+	CCLOG("posRightX: %d  posRightY: %d", (int)posRight.x, (int)posRight.y);
+	CCLOG("posDownX: %d  posDownY: %d", (int)posDown.x, (int)posDown.y);*/
+
+	if (posUp.x >= 0 && posUp.x < rowSize && posUp.y >= 0 && posUp.y < rowSize)
+	{
+		CCLOG("Up move is valid");
+	}
+	if (posLeft.x >= 0 && posLeft.x < rowSize && posLeft.y >= 0 && posLeft.y < rowSize)
+	{
+		CCLOG("Left move is valid");
+	}
+	if (posRight.x >= 0 && posRight.x < rowSize && posRight.y >= 0 && posRight.y < rowSize)
+	{
+		CCLOG("Right move is valid");
+	}
+	if (posDown.x >= 0 && posDown.x < rowSize && posDown.y >= 0 && posDown.y < rowSize)
+	{
+		CCLOG("Down move is valid");
+	}
+
 	for (auto blockItem : blocks)
 	{
 		if (blockItem->getBoundingBox().containsPoint(posConv))
 		{
-			blockItem->setVisible(false);
+			CCLOG(blockItem->getName().data());
+			//blockItem->setVisible(false);
+
+			int clickedItemPos = -1;
+			for (auto item : blocksMap)
+			{
+				if (item.second == std::stoi(blockItem->getName()))
+				{
+					clickedItemPos = item.first;
+				}
+			}
+			CCLOG("Clicked item pos: %d", clickedItemPos);
+
+			int _clickedX = (clickedItemPos - 1) / rowSize;
+			int _clickedY = (clickedItemPos - 1) % rowSize;
+			CCLOG("ClickedBlockPosX: %d  ClickedBlockPosY: %d", _clickedX, _clickedY);
+
+			cocos2d::Vec2 clickedPos{ float(_clickedX), float(_clickedY) };
+
+			if (clickedPos == posUp)
+			{
+				CCLOG("Moving Up");
+				auto tmpPos = blocks.back()->getPosition();
+				blocks.back()->setPosition(blockItem->getPosition());
+				blockItem->setPosition(tmpPos);
+
+				CCLOG("MAP swap-> %d %d", blocksMap[lastblockPos], blocksMap[clickedItemPos]);
+				int tmpLoc = blocksMap[lastblockPos];
+				blocksMap[lastblockPos] = blocksMap[clickedItemPos];
+				blocksMap[clickedItemPos] = tmpLoc;
+
+				return;
+			}
+			else if (clickedPos == posDown)
+			{
+				CCLOG("Moving Down");
+				auto tmpPos = blocks.back()->getPosition();
+				blocks.back()->setPosition(blockItem->getPosition());
+				blockItem->setPosition(tmpPos);
+
+				CCLOG("MAP swap-> %d %d", blocksMap[lastblockPos], blocksMap[clickedItemPos]);
+				int tmpLoc = blocksMap[lastblockPos];
+				blocksMap[lastblockPos] = blocksMap[clickedItemPos];
+				blocksMap[clickedItemPos] = tmpLoc;
+
+				return;
+			}
+			if (clickedPos == posRight)
+			{
+				CCLOG("Moving Right");
+				auto tmpPos = blocks.back()->getPosition();
+				blocks.back()->setPosition(blockItem->getPosition());
+				blockItem->setPosition(tmpPos);
+
+				CCLOG("MAP swap-> %d %d", blocksMap[lastblockPos], blocksMap[clickedItemPos]);
+				int tmpLoc = blocksMap[lastblockPos];
+				blocksMap[lastblockPos] = blocksMap[clickedItemPos];
+				blocksMap[clickedItemPos] = tmpLoc;
+
+				return;
+			}
+			if (clickedPos == posLeft)
+			{
+				CCLOG("Moving Left");
+				auto tmpPos = blocks.back()->getPosition();
+				blocks.back()->setPosition(blockItem->getPosition());
+				blockItem->setPosition(tmpPos);
+
+				CCLOG("MAP swap-> %d %d", blocksMap[lastblockPos], blocksMap[clickedItemPos]);
+				int tmpLoc = blocksMap[lastblockPos];
+				blocksMap[lastblockPos] = blocksMap[clickedItemPos];
+				blocksMap[clickedItemPos] = tmpLoc;
+
+				return;
+			}
 		}
 	}
 }

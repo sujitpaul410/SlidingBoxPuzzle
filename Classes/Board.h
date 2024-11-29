@@ -15,6 +15,7 @@ private:
 	bool isSolved;
 	std::vector<cocos2d::Sprite*> blocks;
 	std::unordered_map<int, int> blocksMap;
+	std::vector<cocos2d::Vec2> blocksPos;
 
 	Board(int _numRow = 3, int _numColumn = 3);
 
@@ -24,6 +25,7 @@ private:
 	void moveBlock();
 	void highlightBlock();
 	int getRandomNumInRange(int min, int max);
+	void resetBoard(cocos2d::Node* _parent);
 
 public:
 	void initBoard(int _numRow, int _numColumn, std::string background, cocos2d::Node* parent);
