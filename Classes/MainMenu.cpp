@@ -36,8 +36,22 @@ bool MainMenu::init()
     boardBackground->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
     this->addChild(boardBackground, 100, 50);
 
+    //Moves label
+    auto movesLabel = Label::createWithTTF("Moves: 0", "fonts/Marker Felt.ttf", 50);
+    if (movesLabel == nullptr)
+    {
+        problemLoading("'fonts/Marker Felt.ttf'");
+    }
+    else
+    {
+        movesLabel->setPosition(Vec2(origin.x + movesLabel->getContentSize().width, origin.y + 40));
+
+        // add the label as a child to this layer
+        this->addChild(movesLabel, 34);
+    }
+
     Board* board = Board::getInstance();
-    board->initBoard(3, 3, "Boards/Board_1.png", this->getChildByTag(50));
+    board->initBoard(3, 3, "Boards/Board_1.png", this->getChildByTag(50), movesLabel);
 
 
 

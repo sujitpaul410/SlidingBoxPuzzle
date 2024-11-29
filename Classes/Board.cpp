@@ -2,10 +2,11 @@
 
 Board* Board::instance = nullptr;
 
-void Board::initBoard(int _numRow, int _numColumn, std::string _background, cocos2d::Node* _parent)
+void Board::initBoard(int _numRow, int _numColumn, std::string _background, cocos2d::Node* _parent, cocos2d::Label* _movesLabel)
 {
 	rowSize = _numRow;
 	columnSize = _numColumn;
+	movesLabel = _movesLabel;
 
 	cocos2d::Vec2 pos = cocos2d::Vec2(188, 575);
 	float rectPosX = 0;
@@ -118,19 +119,18 @@ bool Board::checkIfSolvable()
 	return false;
 }
 
-int Board::getRandomNumInRange(int min, int max)
+void Board::moveBlock(cocos2d::Sprite* blockItem, int lastblockPos, int clickedItemPos)
 {
-	//CCLOG("called randomNum");
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::uniform_int_distribution<> distrib(min, max);
+	auto tmpPos = blocks.back()->getPosition();
+	blocks.back()->setPosition(blockItem->getPosition());
+	blockItem->setPosition(tmpPos);
 
-	for (int i = 0; i < 4; i++)
-	{
-		CCLOG("%d ", distrib(gen));
-	}
+	CCLOG("MAP swap-> %d %d", blocksMap[lastblockPos], blocksMap[clickedItemPos]);
+	int tmpLoc = blocksMap[lastblockPos];
+	blocksMap[lastblockPos] = blocksMap[clickedItemPos];
+	blocksMap[clickedItemPos] = tmpLoc;
 
-	return distrib(gen);
+	showNumMoves();
 }
 
 void Board::resetBoard(cocos2d::Node* _parent)
@@ -200,16 +200,11 @@ void Board::reSuffleBoard()
 	visitedBlocks.clear();
 }
 
-void Board::moveBlock()
-{
-}
-
-void Board::highlightBlock()
-{
-}
-
 void Board::showNumMoves()
 {
+	numMoves++;
+	auto moves = std::to_string(numMoves);
+	movesLabel->setString("Moves: " + moves);
 }
 
 void Board::onMouseEnded(cocos2d::Event* event)
@@ -284,57 +279,29 @@ void Board::onMouseEnded(cocos2d::Event* event)
 			if (clickedPos == posUp)
 			{
 				CCLOG("Moving Up");
-				auto tmpPos = blocks.back()->getPosition();
-				blocks.back()->setPosition(blockItem->getPosition());
-				blockItem->setPosition(tmpPos);
-
-				CCLOG("MAP swap-> %d %d", blocksMap[lastblockPos], blocksMap[clickedItemPos]);
-				int tmpLoc = blocksMap[lastblockPos];
-				blocksMap[lastblockPos] = blocksMap[clickedItemPos];
-				blocksMap[clickedItemPos] = tmpLoc;
-
+				moveBlock(blockItem, lastblockPos, clickedItemPos);
+				showNumMoves();
 				return;
 			}
 			else if (clickedPos == posDown)
 			{
 				CCLOG("Moving Down");
-				auto tmpPos = blocks.back()->getPosition();
-				blocks.back()->setPosition(blockItem->getPosition());
-				blockItem->setPosition(tmpPos);
-
-				CCLOG("MAP swap-> %d %d", blocksMap[lastblockPos], blocksMap[clickedItemPos]);
-				int tmpLoc = blocksMap[lastblockPos];
-				blocksMap[lastblockPos] = blocksMap[clickedItemPos];
-				blocksMap[clickedItemPos] = tmpLoc;
-
+				moveBlock(blockItem, lastblockPos, clickedItemPos);
+				showNumMoves();
 				return;
 			}
 			if (clickedPos == posRight)
 			{
 				CCLOG("Moving Right");
-				auto tmpPos = blocks.back()->getPosition();
-				blocks.back()->setPosition(blockItem->getPosition());
-				blockItem->setPosition(tmpPos);
-
-				CCLOG("MAP swap-> %d %d", blocksMap[lastblockPos], blocksMap[clickedItemPos]);
-				int tmpLoc = blocksMap[lastblockPos];
-				blocksMap[lastblockPos] = blocksMap[clickedItemPos];
-				blocksMap[clickedItemPos] = tmpLoc;
-
+				moveBlock(blockItem, lastblockPos, clickedItemPos);
+				showNumMoves();
 				return;
 			}
 			if (clickedPos == posLeft)
 			{
 				CCLOG("Moving Left");
-				auto tmpPos = blocks.back()->getPosition();
-				blocks.back()->setPosition(blockItem->getPosition());
-				blockItem->setPosition(tmpPos);
-
-				CCLOG("MAP swap-> %d %d", blocksMap[lastblockPos], blocksMap[clickedItemPos]);
-				int tmpLoc = blocksMap[lastblockPos];
-				blocksMap[lastblockPos] = blocksMap[clickedItemPos];
-				blocksMap[clickedItemPos] = tmpLoc;
-
+				moveBlock(blockItem, lastblockPos, clickedItemPos);
+				showNumMoves();
 				return;
 			}
 		}
@@ -352,11 +319,13 @@ void Board::onMouseMove(cocos2d::Event* event)
 	{
 		if (blockItem->getBoundingBox().containsPoint(posConv))
 		{
-			blockItem->setOpacity(100);
+			//blockItem->setOpacity(100);
+			blockItem->setColor(cocos2d::Color3B(255, 255, 0));
 		}
 		else
 		{
-			blockItem->setOpacity(255);
+			//blockItem->setOpacity(255);
+			blockItem->setColor(cocos2d::Color3B(255, 255, 255));
 		}
 	}
 }
@@ -376,4 +345,5 @@ Board::Board(int _numRow, int _numColumn)
 {
 	rowSize = _numRow;
 	columnSize = _numColumn;
+	numMoves = 0;
 }
